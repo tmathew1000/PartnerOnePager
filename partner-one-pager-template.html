@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Partner One-Pager Template</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.24;
+    }
+    a {
+      color: var(--cp-link);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .page {
+      width: 980px;
+      min-height: 1280px;
+      margin: 18px auto;
+      padding: 22px 36px 12px;
+      position: relative;
+      overflow: hidden;
+      background: var(--cp-surface);
+      border: 6px solid var(--cp-accent);
+      border-radius: 22px;
+      box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+    }
+    .confidential-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      margin: 0 auto 10px;
+      padding: 5px 10px;
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      background: var(--cp-accent-soft);
+      color: var(--cp-accent);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 32px;
+      align-items: start;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .logos { display: flex; align-items: center; gap: 20px; }
+    .logo-box { display: flex; align-items: center; min-height: 62px; }
+    .partner-logo-placeholder {
+      width: 150px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--cp-border-strong);
+      border-radius: 0.625rem;
+      color: var(--cp-link);
+      font-weight: 900;
+      font-size: 18px;
+      letter-spacing: -.02em;
+    }
+    .logo-divider { width: 1px; height: 58px; background: var(--cp-border-strong); }
+    .category-ribbon {
+      margin-top: 12px;
+      padding: 12px 46px;
+      min-width: 240px;
+      text-align: center;
+      background: var(--cp-link);
+      color: var(--cp-accent-fg);
+      clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: stretch;
+      padding: 18px 0 14px;
+      border-bottom: 1px solid var(--cp-border);
+    }
+    h1 {
+      margin: 0 0 16px;
+      color: var(--cp-text);
+      font-size: 43px;
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+    }
+    .headline {
+      margin: 0 0 22px;
+      color: var(--cp-link);
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 1.16;
+    }
+    .summary {
+      margin: 0;
+      max-width: 620px;
+      color: var(--cp-text-muted);
+      font-size: 16px;
+    }
+    .snapshot {
+      align-self: stretch;
+      padding: 16px 18px 14px;
+      border: 2px solid var(--cp-border-strong);
+      border-radius: 20px;
+      background: var(--cp-surface);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .snapshot-title {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+      color: var(--cp-link);
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .snapshot p {
+      margin: 6px 0;
+      color: var(--cp-text-muted);
+      font-size: 12.5px;
+      line-height: 1.25;
+    }
+    .label { color: var(--cp-text); font-weight: 800; }
+    .tag { color: var(--cp-text-muted); font-size: 11px; font-weight: 650; }
+    .section-title {
+      margin: 16px 0 16px;
+      color: var(--cp-link);
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+    }
+    .better-copy {
+      margin: 0 0 20px;
+      color: var(--cp-text-muted);
+      font-size: 16px;
+    }
+    .solution-row {
+      display: grid;
+      grid-template-columns: 1fr 48px 1fr 48px 1fr;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .solution-card {
+      min-height: 184px;
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      border-radius: 32px;
+      background: color-mix(in srgb, var(--cp-link) 10%, var(--cp-surface));
+    }
+    .solution-card:nth-of-type(2) {
+      background: color-mix(in srgb, var(--cp-success) 8%, var(--cp-surface));
+    }
+    .solution-card h3 {
+      margin: 0 0 12px;
+      color: var(--cp-text);
+      font-size: 21px;
+      line-height: 1.05;
+    }
+    .solution-card p {
+      margin: 0;
+      color: var(--cp-text);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .solution-icon {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 12px;
+      display: grid;
+      place-items: center;
+      color: var(--cp-link);
+    }
+    .solution-icon svg,
+    .star svg,
+    .check svg,
+    .use-case .icon svg,
+    .care-icon svg,
+    .round-icon svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.25;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .snapshot-title svg {
+      width: 20px;
+      height: 15px;
+      flex: 0 0 auto;
+      display: block;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.25;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .plus-dot {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--cp-link);
+      color: var(--cp-accent-fg);
+      font-size: 30px;
+      font-weight: 800;
+    }
+    .opportunity-strip {
+      margin: 12px 0 14px;
+      padding: 8px 10px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--cp-link) 10%, var(--cp-surface));
+    }
+    .opportunity-title {
+      margin: 0 0 6px;
+      color: var(--cp-link);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .opportunity-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0;
+    }
+    .opportunity-field {
+      padding: 4px 9px;
+      border-left: 1px solid var(--cp-border);
+    }
+    .opportunity-field:first-child { border-left: 0; }
+    .opportunity-field strong {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--cp-text);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+    }
+    .opportunity-field span {
+      color: var(--cp-text-muted);
+      font-size: 10.5px;
+      line-height: 1.18;
+    }
+    .star {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--cp-link);
+      color: var(--cp-accent-fg);
+      padding: 10px;
+    }
+    .use-grid-wrap {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      border-top: 1px solid var(--cp-border);
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .engage { padding: 8px 16px 0 12px; border-right: 1px solid var(--cp-border); }
+    .engage-item {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 10px;
+      margin: 14px 0;
+      color: var(--cp-text);
+      font-size: 13px;
+    }
+    .check {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--cp-link);
+      color: var(--cp-accent-fg);
+      padding: 7px;
+    }
+    .use-cases { padding: 8px 8px 0 16px; }
+    .use-cases-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+    }
+    .use-case {
+      min-height: 144px;
+      padding: 0 10px;
+      text-align: center;
+      border-right: 1px solid var(--cp-border);
+    }
+    .use-case:last-child { border-right: 0; }
+    .use-case .icon {
+      height: 44px;
+      width: 44px;
+      margin: 0 auto 8px;
+      color: var(--cp-link);
+    }
+    .use-case h3 {
+      margin: 0 0 8px;
+      color: var(--cp-text);
+      font-size: 13px;
+      line-height: 1.12;
+    }
+    .use-case p {
+      margin: 0;
+      color: var(--cp-text);
+      font-size: 11.5px;
+    }
+    .proof-strip {
+      margin: 6px 0;
+      padding: 8px 12px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: color-mix(in srgb, var(--cp-link) 8%, var(--cp-surface));
+      color: var(--cp-text-muted);
+      font-size: 11.5px;
+    }
+    .care-area {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .care-list { padding: 4px 28px 4px 12px; border-right: 1px solid var(--cp-border); }
+    .care-title {
+      margin: 0 0 8px;
+      color: var(--cp-link);
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+    }
+    .care-item {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 16px;
+      margin: 0 0 8px;
+    }
+    .care-icon {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--cp-link);
+      color: var(--cp-accent-fg);
+      padding: 10px;
+    }
+    .care-item h3 { margin: 0 0 4px; color: var(--cp-text); font-size: 16px; }
+    .care-item p { margin: 0; color: var(--cp-text); font-size: 13.5px; }
+    .metrics {
+      padding: 4px 0 4px 16px;
+      display: flex;
+      align-items: stretch;
+    }
+    .metric-card {
+      width: 100%;
+      padding: 10px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      border-radius: 44px;
+      background: color-mix(in srgb, var(--cp-link) 5%, var(--cp-surface));
+    }
+    .metric-card hr {
+      width: 80%;
+      border: 0;
+      border-top: 1px solid var(--cp-border);
+      margin: 8px auto;
+    }
+    .round-icon {
+      width: 60px;
+      height: 60px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 6px;
+      border-radius: 50%;
+      background: var(--cp-success);
+      color: var(--cp-accent-fg);
+      padding: 15px;
+    }
+    .round-icon.alt { background: var(--cp-accent); }
+    .metric-card strong {
+      display: block;
+      color: var(--cp-text);
+      font-size: 17px;
+      line-height: 1.14;
+    }
+    .metric-card .yes {
+      margin-top: 4px;
+      color: var(--cp-accent);
+      font-size: 26px;
+      font-weight: 900;
+    }
+    .metric-list {
+      display: grid;
+      gap: 0;
+      text-align: left;
+    }
+    .metric-row {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 0;
+      border-top: 1px solid var(--cp-border);
+    }
+    .metric-row:first-child { border-top: 0; }
+    .metric-amount {
+      color: var(--cp-accent);
+      font-size: 21px;
+      font-weight: 900;
+      line-height: 1;
+      text-align: right;
+    }
+    .metric-detail strong {
+      font-size: 12px;
+      line-height: 1.1;
+    }
+    .metric-detail small {
+      display: block;
+      margin-top: 2px;
+      color: var(--cp-text-muted);
+      font-size: 9px;
+      line-height: 1.15;
+    }
+    .market {
+      margin: 8px 0 10px;
+      padding: 8px 12px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: color-mix(in srgb, var(--cp-link) 8%, var(--cp-surface));
+      color: var(--cp-text-muted);
+      font-size: 11.5px;
+      line-height: 1.28;
+    }
+    .cta {
+      display: grid;
+      grid-template-columns: 90px 1fr 120px;
+      gap: 16px;
+      align-items: start;
+      margin: 10px 0 8px;
+      padding: 12px 18px;
+      border: 1px solid var(--cp-border);
+      border-radius: 28px;
+      background: color-mix(in srgb, var(--cp-link) 8%, var(--cp-surface));
+      text-align: center;
+    }
+    .cta h2 {
+      margin: 0 0 8px;
+      color: var(--cp-link);
+      font-size: 23px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .cta p {
+      margin: 0 0 6px;
+      color: var(--cp-text);
+      font-size: 15px;
+      font-weight: 800;
+    }
+    .cta-links { color: var(--cp-text-muted); font-size: 13px; line-height: 1.35; }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--cp-text-muted);
+      font-size: 8.8px;
+      margin-top: 4px;
+    }
+    @media print {
+      body { background: var(--cp-surface); }
+      .page { width: 100%; min-height: auto; margin: 0; border-radius: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="confidential-label">Microsoft Confidential</div>
+
+    <section class="top">
+      <div class="logos">
+        <div class="logo-box">
+          <div class="partner-logo-placeholder">{{PARTNER_LOGO_OR_NAME}}</div>
+        </div>
+        <div class="logo-divider"></div>
+        <div class="logo-box">
+          <svg width="182" height="48" viewBox="0 0 182 48" role="img" aria-label="Microsoft">
+            <rect x="0" y="8" width="18" height="18" fill="#F25022"/>
+            <rect x="22" y="8" width="18" height="18" fill="#7FBA00"/>
+            <rect x="0" y="30" width="18" height="18" fill="#00A4EF"/>
+            <rect x="22" y="30" width="18" height="18" fill="#FFB900"/>
+            <text x="52" y="36" font-family="Segoe UI, Aptos, Calibri, sans-serif" font-size="28" font-weight="500" fill="#5c5c5c">Microsoft</text>
+          </svg>
+        </div>
+      </div>
+      <div class="category-ribbon">{{CATEGORY_RIBBON}}</div>
+    </section>
+
+    <section class="hero">
+      <div>
+        <h1>{{PARTNER_NAME}} + Microsoft</h1>
+        <p class="headline">{{HEADLINE_VALUE_STATEMENT}}</p>
+        <p class="summary">{{EXECUTIVE_SUMMARY}} <span class="tag">{{EVIDENCE_CLASSIFICATION}}</span></p>
+      </div>
+      <aside class="snapshot">
+        <div class="snapshot-title">
+          <svg width="58" height="44" viewBox="0 0 58 44" aria-hidden="true">
+            <circle cx="18" cy="13" r="5"/>
+            <circle cx="38" cy="13" r="5"/>
+            <path d="M8 38c1.8-8.5 7.1-13 15-13"/>
+            <path d="M35 25c7.9 0 13.2 4.5 15 13"/>
+            <path d="M24 36h10"/>
+          </svg>
+          <span>Partner Snapshot</span>
+        </div>
+        <p><span class="label">Category:</span> {{CATEGORY}}</p>
+        <p><span class="label">Industries:</span> {{INDUSTRIES}}</p>
+        <p><span class="label">Customer segments:</span> {{CUSTOMER_SEGMENTS}}</p>
+        <p><span class="label">Available in:</span> {{MARKETPLACE_AVAILABILITY}}</p>
+        <p><span class="label">PartnerOneID:</span> {{PARTNER_ONE_ID}} / {{PARTNER_ONE_NAME}}</p>
+        <p><span class="label">Internal Contact:</span> {{INTERNAL_CONTACT_NAME}} (PDM)</p>
+        <p><span class="label">Website:</span> <a href="{{WEBSITE_URL}}">{{WEBSITE_DISPLAY}}</a></p>
+      </aside>
+    </section>
+
+    <section>
+      <h2 class="section-title">Better together: {{PARTNER_NAME}} + Microsoft</h2>
+      <p class="better-copy">{{BETTER_TOGETHER_COPY}}</p>
+    </section>
+
+    <section class="solution-row" aria-label="Solution cards">
+      <article class="solution-card">
+        <div class="solution-icon" aria-label="Solution 1 icon">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M20 44h25a11 11 0 0 0 1-22 16 16 0 0 0-30-4A13 13 0 0 0 20 44Z"/><path d="M24 34h16"/><path d="M32 26v16"/></svg>
+        </div>
+        <h3>{{SOLUTION_1_TITLE}}</h3>
+        <p>{{SOLUTION_1_COPY}}</p>
+      </article>
+      <div class="plus-dot">+</div>
+      <article class="solution-card">
+        <div class="solution-icon" aria-label="Solution 2 icon">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M18 46c8-4 20-4 28 0"/><circle cx="21" cy="21" r="5"/><circle cx="43" cy="21" r="5"/><path d="M32 13v12"/><path d="M26 31h12"/><path d="M32 31v14"/></svg>
+        </div>
+        <h3>{{SOLUTION_2_TITLE}}</h3>
+        <p>{{SOLUTION_2_COPY}}</p>
+      </article>
+      <div class="plus-dot">+</div>
+      <article class="solution-card">
+        <div class="solution-icon" aria-label="Solution 3 icon">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 46V18l18-8 18 8v28l-18 8-18-8Z"/><path d="M14 18l18 8 18-8"/><path d="M32 26v28"/><path d="M22 34h20"/></svg>
+        </div>
+        <h3>{{SOLUTION_3_TITLE}}</h3>
+        <p>{{SOLUTION_3_COPY}}</p>
+      </article>
+    </section>
+
+    <section class="opportunity-strip" aria-label="Seller opportunity">
+      <h2 class="opportunity-title">Seller opportunity</h2>
+      <div class="opportunity-grid">
+        <div class="opportunity-field">
+          <strong>Customer signal</strong>
+          <span>{{CUSTOMER_SIGNAL}}</span>
+        </div>
+        <div class="opportunity-field">
+          <strong>Business outcome</strong>
+          <span>{{BUSINESS_OUTCOME}}</span>
+        </div>
+        <div class="opportunity-field">
+          <strong>Microsoft pull-through</strong>
+          <span>{{MICROSOFT_PULL_THROUGH}}</span>
+        </div>
+        <div class="opportunity-field">
+          <strong>Incentive</strong>
+          <span>{{INCENTIVE_STATUS_AND_PLAY}}</span>
+        </div>
+        <div class="opportunity-field">
+          <strong>Next action</strong>
+          <span>{{NEXT_SELLER_ACTION}}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="use-grid-wrap">
+      <div class="engage">
+        <h2 class="section-title">When to engage {{PARTNER_NAME}}</h2>
+        <div class="engage-item"><div class="check"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></div><div>{{ENGAGE_SIGNAL_1}}</div></div>
+        <div class="engage-item"><div class="check"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></div><div>{{ENGAGE_SIGNAL_2}}</div></div>
+        <div class="engage-item"><div class="check"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></div><div>{{ENGAGE_SIGNAL_3}}</div></div>
+        <div class="engage-item"><div class="check"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></div><div>{{ENGAGE_SIGNAL_4}}</div></div>
+      </div>
+      <div class="use-cases">
+        <h2 class="section-title">Key use cases</h2>
+        <div class="use-cases-row">
+          <article class="use-case">
+            <div class="icon" aria-label="Use case 1 icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4v16l10-2-14 26V28l-10 2L24 4Z"/></svg></div>
+            <h3>{{USE_CASE_1_TITLE}}</h3>
+            <p>{{USE_CASE_1_COPY}}</p>
+          </article>
+          <article class="use-case">
+            <div class="icon" aria-label="Use case 2 icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 38V10h24v28H12Z"/><path d="M18 18h12"/><path d="M18 25h8"/><path d="M18 32h12"/></svg></div>
+            <h3>{{USE_CASE_2_TITLE}}</h3>
+            <p>{{USE_CASE_2_COPY}}</p>
+          </article>
+          <article class="use-case">
+            <div class="icon" aria-label="Use case 3 icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 36c8-18 14-6 20-16 4-7 8-8 12-8"/><path d="M32 12h8v8"/></svg></div>
+            <h3>{{USE_CASE_3_TITLE}}</h3>
+            <p>{{USE_CASE_3_COPY}}</p>
+          </article>
+          <article class="use-case">
+            <div class="icon" aria-label="Use case 4 icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 40V18h9v22"/><path d="M19 40V10h10v30"/><path d="M29 40V22h9v18"/><path d="M7 40h34"/></svg></div>
+            <h3>{{USE_CASE_4_TITLE}}</h3>
+            <p>{{USE_CASE_4_COPY}}</p>
+          </article>
+        </div>
+        <div class="proof-strip">{{PROOF_STRIP}}</div>
+      </div>
+    </section>
+
+    <section class="care-area">
+      <div class="care-list">
+        <h2 class="care-title">Why sellers should care</h2>
+        <article class="care-item">
+          <div class="care-icon" aria-label="Seller reason 1 icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5h16v14H4Z"/><path d="M8 16V9"/><path d="M12 16v-5"/><path d="M16 16v-8"/></svg></div>
+          <div><h3>{{SELLER_REASON_1_TITLE}}</h3><p>{{SELLER_REASON_1_COPY}}</p></div>
+        </article>
+        <article class="care-item">
+          <div class="care-icon" aria-label="Seller reason 2 icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"/><path d="M5 8h14"/><path d="M7 16h10"/><path d="M8 5 5 8l3 3"/><path d="m16 13 3 3-3 3"/></svg></div>
+          <div><h3>{{SELLER_REASON_2_TITLE}}</h3><p>{{SELLER_REASON_2_COPY}}</p></div>
+        </article>
+        <article class="care-item">
+          <div class="care-icon" aria-label="Seller reason 3 icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v10H4z"/><path d="M7 11h5"/><path d="M7 14h10"/></svg></div>
+          <div><h3>{{SELLER_REASON_3_TITLE}}</h3><p>{{SELLER_REASON_3_COPY}}</p></div>
+        </article>
+      </div>
+      <aside class="metrics">
+        <div class="metric-card">
+          <h2 class="opportunity-title">Opportunity Signals</h2>
+          <div class="metric-list">
+            <!-- Omit any row whose value is unavailable. -->
+            <div class="metric-row">
+              <div class="metric-amount">{{COSELL_CONTRACT_VALUE}}</div>
+              <div class="metric-detail"><strong>Co-sell contract value</strong><small>{{COSELL_CONTRACT_VALUE_SCOPE}}</small></div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-amount">{{REGISTERED_COSELL_DEALS}}</div>
+              <div class="metric-detail"><strong>Registered co-sell deals</strong><small>{{REGISTERED_COSELL_DEALS_SCOPE}}</small></div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-amount">{{PARTNER_CLOSE_RATE}}</div>
+              <div class="metric-detail"><strong>Partner Close Rate</strong><small>{{PARTNER_CLOSE_RATE_SCOPE}}</small></div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <div class="market">
+      <span class="label">Marketplace / MACC / transactable callout:</span> {{MARKETPLACE_MACC_TRANSACTABLE_CALLOUT}}
+    </div>
+
+    <section class="cta">
+      <div class="logo-box">
+        <div class="partner-logo-placeholder">{{PARTNER_LOGO_OR_NAME}}</div>
+      </div>
+      <div>
+        <h2>Call to action</h2>
+        <p>{{CTA_COPY}}</p>
+        <div class="cta-links">
+          <a href="{{CTA_LINK_1_URL}}">{{CTA_LINK_1_LABEL}}</a> |
+          <a href="{{CTA_LINK_2_URL}}">{{CTA_LINK_2_LABEL}}</a> |
+          {{CTA_LINK_3_OR_OWNER}}
+        </div>
+      </div>
+      <div class="logo-box">
+        <svg width="104" height="28" viewBox="0 0 104 28" role="img" aria-label="Microsoft">
+          <rect x="0" y="4" width="10" height="10" fill="#F25022"/>
+          <rect x="12" y="4" width="10" height="10" fill="#7FBA00"/>
+          <rect x="0" y="16" width="10" height="10" fill="#00A4EF"/>
+          <rect x="12" y="16" width="10" height="10" fill="#FFB900"/>
+          <text x="30" y="22" font-family="Segoe UI, Aptos, Calibri, sans-serif" font-size="17" font-weight="500" fill="#5c5c5c">Microsoft</text>
+        </svg>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>© Microsoft Corporation. All rights reserved.</span>
+      <span>Updated: {{UPDATED_MONTH_YEAR}}</span>
+    </footer>
+  </main>
+</body>
+</html>
