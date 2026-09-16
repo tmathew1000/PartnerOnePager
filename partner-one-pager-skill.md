@@ -1,14 +1,6 @@
 ---
-name: partner-one-pager
-description: >-
-  Build a seller-facing Microsoft partner one-pager, grounded in authenticated internal
-  sources. Resolves the partner to a PartnerOneID, retrieves Partner Center specializations
-  and designations, Partner-Influenced ACR, co-sell opportunity signals, marketplace offers
-  and the PMX partner team — each with a source and an explicit confidence — then renders
-  using the canonical partner one-pager template. WHEN the user asks to "create a partner one-pager", "build a
-  partner brief", "make a battlecard", or runs /partner-one-pager for a named partner. DO
-  NOT use for rendering an arbitrary HTML artifact (use /web-artifacts-builder directly) or
-  for public marketplace lookup alone (that needs no auth).
+name: "partner-one-pager"
+description: "Build a seller-facing Microsoft partner one-pager, grounded in authenticated internal sources. Resolves the partner to a PartnerOneID, retrieves Partner Center specializations and designations, Partner-Influenced ACR, co-sell opportunity signals, marketplace offers and the PMX partner team — each with a source and an explicit confidence — then renders using the canonical partner one-pager template. WHEN the user asks to \"create a partner one-pager\", \"build a partner brief\", \"make a battlecard\","
 ---
 
 # Partner one-pager
@@ -46,7 +38,7 @@ If the seller uploads or links an existing partner one-pager with the request, t
 - Treat uploaded one-pager content as contextual evidence until each claim is confirmed, contradicted, or marked `Validate`.
 - Lead with customer and seller business impact, not product features.
 - Do not present pipeline value, partner revenue, Marketplace billed sales, or PAEC as quota retired. Label each amount by what it actually measures.
-- In Opportunity Signals, omit unavailable fields instead of rendering a visible `Validate` row. Preserve the missing-field status in generation evidence and the final response.
+- In Opportunity Signals, render only `Co-sell contract value`, `Registered co-sell deals`, and `Partner Close Rate`; do not add Marketplace billed sales, PAEC, partner revenue, customer Azure consumption, or any other metric to that section. Omit unavailable allowed fields instead of rendering a visible `Validate` row. Preserve the missing-field status in generation evidence and the final response.
 
 ## Business impact contract
 
@@ -178,6 +170,8 @@ Render one compact `Opportunity Signals` block. Its fields are:
 1. `Co-sell contract value`
 2. `Registered co-sell deals`
 3. `Partner Close Rate`
+
+These are the only fields allowed in the rendered `Opportunity Signals` section. Do not include `Marketplace billed sales`, `PAEC`, partner revenue, customer Azure consumption, marketplace ACR, MACC values, or any other commercial metric in this section. Those signals may be used in the proof strip, marketplace/MACC callout, seller reasons, or generation evidence when relevant and properly labeled.
 
 Use one row per `PSXDealID` before aggregating contract value:
 
@@ -311,7 +305,7 @@ SELECT COUNT(*) AS deals,
 FROM deals
 ```
 
-Only render rows with a grounded, non-null monetary value. Do not show an unavailable monetary field or a `Validate` placeholder in the page. If customer Azure consumption is unavailable, start with the next available field in the priority order. Include a concise caveat beside every amount that is not direct customer Azure consumption.
+Only render rows with a grounded, non-null monetary value. Do not show an unavailable monetary field or a `Validate` placeholder in the page. If customer Azure consumption is unavailable, start with the next available field in the priority order. Include a concise caveat beside every amount that is not direct customer Azure consumption. These quota-relevant amounts are supporting proof signals; do not add them to the `Opportunity Signals` block except for the allowed `Co-sell contract value` field.
 
 ### ISV and GISV incentive treatment
 
@@ -417,7 +411,7 @@ Use a single portrait page, approximately 980px wide and 1280px tall, with this 
 7. Compact `Seller opportunity` strip with `Customer signal`, `Business outcome`, `Microsoft pull-through`, `Incentive`, and `Next action`.
 8. Split middle section: left `When to engage` checklist, right `Key use cases` row.
 9. Small proof strip under use cases for the most relevant grounded commercial or quota signal.
-10. `Why sellers should care` section: three stacked signal → impact → Microsoft-motion cards on the left and a compact monetary proof list on the right. Order available amounts as customer Azure consumption, Marketplace billed sales, co-sell contract value, partner revenue, then PAEC. Omit unavailable monetary fields. Keep this section vertically compact by minimizing margins and padding without reducing font or icon sizes.
+10. `Why sellers should care` section: three stacked signal → impact → Microsoft-motion cards on the left and a compact `Opportunity Signals` list on the right containing only `Co-sell contract value`, `Registered co-sell deals`, and `Partner Close Rate`. Omit unavailable allowed fields. Keep this section vertically compact by minimizing margins and padding without reducing font or icon sizes.
 11. Marketplace / MACC / transactable callout strip.
 12. Rounded Call to Action footer with partner logo, CTA copy and links, and Microsoft logo.
 13. Compact footer with copyright/update date. Do not render a visible source or validation note.
