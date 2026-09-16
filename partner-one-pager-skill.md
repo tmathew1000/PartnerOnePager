@@ -396,13 +396,13 @@ Delegate rendering to `/web-artifacts-builder` and create a self-contained HTML 
 [PARTNER NAME]-one-pager.html
 ```
 
-Use the SharePoint-hosted reusable template as the canonical output reference:
+Use the GitHub-hosted reusable template as the canonical output reference:
 
 ```text
-https://microsoft.sharepoint.com/:u:/r/teams/PartnerOnePager/Page%20templates/Forms/AllItems.aspx?id=%2Fteams%2FPartnerOnePager%2FPage%20templates%2Fpartner%2Done%2Dpager%2Dtemplate%2Ehtml&parent=%2Fteams%2FPartnerOnePager%2FPage%20templates&p=true&share=cQrdN3HeIfl3Q5f225csuPH7EgUB7QI5%2DnUMJQdnwnLQsNFgRQ
+https://github.com/tmathew1000/PartnerOnePager/blob/main/partner-one-pager-template.html
 ```
 
-The template is named `partner-one-pager template` and is the sole authority for the reusable HTML structure, visual styling, Microsoft logo SVG, iconography, proportions, spacing, and replacement placeholders. Read the SharePoint template before rendering every partner one-pager. If the template cannot be accessed, report that limitation rather than silently using a stale local copy.
+The template is named `partner-one-pager-template.html` and is the sole authority for the reusable HTML structure, visual styling, Microsoft logo SVG, iconography, proportions, spacing, and replacement placeholders. Read the GitHub template before rendering every partner one-pager. If the template cannot be accessed, report that limitation rather than silently using a stale local copy.
 
 ### Required page structure
 
@@ -426,7 +426,7 @@ Keep copy concise: 3 seller reasons, 4 use cases, 5 engagement signals, and 3 CT
 
 ### Visual style
 
-Match the SharePoint-hosted `partner-one-pager-template.html` as the visual source of truth.
+Match the GitHub-hosted `partner-one-pager-template.html` as the visual source of truth.
 
 - Use the mandatory `/web-artifacts-builder` Clawpilot theme script and CSS variables.
 - Preserve the Microsoft field-collateral feel: white surface, bold rounded orange-red outer border, Microsoft blue accents, muted gray body copy, rounded cards, and compact executive-scan typography.
