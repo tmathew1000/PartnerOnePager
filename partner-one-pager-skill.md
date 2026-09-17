@@ -54,13 +54,12 @@ Use these formulas to keep the one-pager seller-focused:
 | Incentive | `<Program> - <eligibility status> - <maximum benefit when verified>` |
 | CTA | `Target <account type> -> position <offer> -> use <incentive> -> contact <owner>` |
 
-Render a compact `Seller opportunity` strip with five fields:
+Render a compact `Seller opportunity` strip with four fields:
 
 1. `Customer signal`
 2. `Business outcome`
 3. `Microsoft pull-through`
 4. `Incentive`
-5. `Next action`
 
 Rules:
 
@@ -420,7 +419,7 @@ Use a single portrait page, approximately 980px wide and 1280px tall, with this 
 4. Hero section with large partner + Microsoft title, blue headline, short summary, and a right-side rounded Partner Snapshot card. The left hero block and Partner Snapshot card must have matching heights. Size and vertically center the snapshot text so it uses the available card space without overflowing. Include `Customer segments` populated from observed attributed ACR or co-sell activity and `Internal Contact` populated from the primary PDM in PMX, formatted as `<PDM name> (PDM)`. Group commercial/public-sector variants under their segment family when needed and do not imply these are declared target segments.
 5. Better Together statement.
 6. Three large rounded solution cards connected by circular plus icons.
-7. Compact `Seller opportunity` strip with `Customer signal`, `Business outcome`, `Microsoft pull-through`, `Incentive`, and `Next action`.
+7. Compact `Seller opportunity` strip with `Customer signal`, `Business outcome`, `Microsoft pull-through`, and `Incentive`.
 8. Split middle section: left `When to engage` checklist, right `Key use cases` row.
 9. Small proof strip under use cases for the most relevant grounded commercial or quota signal.
 10. `Why sellers should care` section: three stacked signal -> impact -> Microsoft-motion cards on the left and a compact `Opportunity Signals` card on the right containing only `Co-sell contract value`, `Registered co-sell deals`, and `Partner Close Rate`. Format `Opportunity Signals` as a two-column list: large bold metric values in the left column and each signal title plus concise scope text in the right column, with subtle horizontal dividers between rows. Omit unavailable allowed fields. Keep this section vertically compact by minimizing margins and padding without reducing font or icon sizes.
