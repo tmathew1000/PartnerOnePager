@@ -68,7 +68,7 @@ Rules:
 - Every seller reason must explain why the signal matters commercially and what Microsoft motion it creates.
 - Phrase use cases as outcomes, such as `Reduce outages with grid-edge visibility`, rather than product-only labels.
 - Prefer grounded customer reach, Marketplace sales, pipeline, wins, close rates, and customer consumption as proof.
-- Remove claims that do not change seller targeting, positioning, funding, or next action.
+- Remove claims that do not change seller targeting, positioning, funding, or seller motion.
 - Never headline PAEC or partner self-consumption as customer impact.
 
 ## Classification labels
