@@ -532,7 +532,7 @@ For generated HTML one-pagers and JSON profiles, use SharePoint REST `Files/add`
 
 Pick the upload route by whether the target file already exists, to avoid slow retries:
 
-- Replacing a file that already exists in the target library: prefer `workiq_upload_file` with the existing file's `sharePointUrl`, or `driveId + itemId`. This is the fastest no-browser path, but it only works against an item that already exists — it cannot reliably create a brand-new library file, and passing a not-yet-existing file URL returns access denied.
+- Replacing a file that already exists in the target library: overwrite the existing SharePoint file in place using the authenticated SharePoint REST `Files/add(...,overwrite=true)` flow below. `workiq_upload_file` may be used only when it accepts the existing file's `sharePointUrl` or `driveId + itemId`; if it returns an invalid-argument or access-denied error, switch directly to SharePoint REST instead of creating an incremented filename.
 - Creating a brand-new file (the common one-pager and JSON-profile case): use the authenticated browser-side SharePoint REST `Files/add` flow below. Scout's current `workiq_upload_file` wrapper does not expose a create-in-folder operation (`driveId + parentFolderItemId + fileName`), so browser REST is the reliable first-run path today.
 - If a direct Microsoft Graph upload tool is available (`PUT /drives/{driveId}/items/{folderItemId}:/{fileName}:/content` with the token handled internally), prefer it over the browser for new files. Do not scrape bearer tokens from browser sessions or token caches.
 
@@ -548,7 +548,7 @@ Operational gotchas that cause slow retries — avoid them up front:
    - `Partner Profile JSON` document library, server-relative folder path `/teams/PartnerOnePager/Partner Profile JSON`.
    - `Partner Matcher Index` list.
    Capture `siteId`, library/list IDs, existing filename state, and target web URLs. Treat `Forms/AllItems.aspx` and `AllItems.aspx` URLs as entry points only; after resolution, use the returned IDs and list/library names for follow-up schema, metadata, item lookup, and verification. If SharePoint reads are throttled, do not guess writes; report the throttling blocker.
-2. Preserve the human-readable filename `[PARTNER NAME]-one-pager.html` for HTML and `[PARTNER NAME]-partner-profile.json` for JSON. If a file with the same name already exists, replace it only when the user explicitly asked to update/replace; otherwise create the smallest unused incremented filename, e.g. `[PARTNER NAME]-one-pager-2.html` and `[PARTNER NAME]-partner-profile-2.json`.
+2. Preserve the human-readable filename `[PARTNER NAME]-one-pager.html` for HTML and `[PARTNER NAME]-partner-profile.json` for JSON. If a file with the same name already exists, overwrite it in place so the partner has one current SharePoint one-pager and one current JSON profile. Create an incremented filename, e.g. `[PARTNER NAME]-one-pager-2.html` and `[PARTNER NAME]-partner-profile-2.json`, only when the user explicitly asks to preserve the existing version as a separate historical copy.
 3. Ensure a browser session is signed into `https://microsoft.sharepoint.com/teams/PartnerOnePager`. Get a SharePoint request digest by POSTing to `https://microsoft.sharepoint.com/teams/PartnerOnePager/_api/contextinfo` with `credentials: 'include'` and `Accept: application/json;odata=nometadata`.
 4. Upload the actual HTML bytes directly to the HTML library with SharePoint REST:
 
