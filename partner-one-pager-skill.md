@@ -53,14 +53,16 @@ Use these formulas to keep the one-pager seller-focused:
 | Seller reason | `<Buying signal> -> <customer impact> -> <Microsoft motion>` |
 | Proof | `<Metric> - <period> - <scope> - <confidence>` |
 | Incentive | `<Program> - <eligibility status> - <maximum benefit when verified>` |
+| Next action | `<Owner> - <specific follow-up> - <target account or opportunity>` |
 | CTA | `Target <account type> -> position <offer> -> use <incentive> -> contact <owner>` |
 
-Render a compact `Seller opportunity` strip with four fields:
+Render a compact `Seller opportunity` strip with five fields:
 
 1. `Customer signal`
 2. `Business outcome`
 3. `Microsoft pull-through`
 4. `Incentive`
+5. `Next action`
 
 Rules:
 
@@ -400,7 +402,7 @@ Retrieve the values for the `Hero Products` Partner Snapshot field as follows:
 
 The Hero Product dropdown is not the same as the `_Measures[# Primary Hero Products for FY27]` card. Do not use that FY27 measure to populate `Hero Products`, and do not discard valid dropdown values when the primary-product card is blank.
 
-Render the distinct values as a concise semicolon-separated list in `{{HERO_PRODUCTS}}` and record the evidence as `RQA Qualify - OKR2; Fiscal Year: All; PartnerOne Name: <partner>`. If the authenticated, partner-filtered dropdown returns no values, render `grounded (none)`. If RQA is inaccessible or the partner filter cannot be confirmed, render `Validate`.
+Render the distinct values as a concise semicolon-separated list in `{{HERO_PRODUCTS}}` and record the evidence as `RQA Qualify - OKR2; Fiscal Year: All; PartnerOne Name: <partner>`. Compact long RQA labels for seller readability while preserving evidence with the original report labels: remove leading solution-area prefixes such as `AI:`, `Apps:`, or `Dev:`, drop parenthetical taxonomy such as `(AI Apps & Agents)` when it is redundant, and simplify product names to their recognizable Microsoft product names without changing meaning. Examples: `AI: Foundry Models - OpenAI (Standard)` -> `Azure OpenAI Foundry Models`; `Apps: Azure Container Apps Serverless GPU (ACA) (AI Apps & Agents)` -> `Azure Container Apps Serverless GPU`; `Apps: Azure Kubernetes Service (AKS) (AI Apps & Agents)` -> `Azure Kubernetes Service`; `Dev: GitHub Copilot (Business, Enterprise)` -> `GitHub Copilot`. If the authenticated, partner-filtered dropdown returns no values, render `grounded (none)`. If RQA is inaccessible or the partner filter cannot be confirmed, render `Validate`.
 
 ### 10. Gather public positioning
 
@@ -444,7 +446,7 @@ Use a single portrait page, approximately 980px wide and 1280px tall, with this 
 4. Hero section with large partner + Microsoft title, blue headline, short summary, and a right-side rounded Partner Snapshot card. The left hero block and Partner Snapshot card must have matching heights. Size and vertically center the snapshot text so it uses the available card space without overflowing. Include `Hero Products` populated from the RQA Hero Product dropdown with Fiscal Year set to `All`, `Customer segments` populated from observed attributed ACR or co-sell activity, and `Internal Contact` populated from the primary PDM in PMX, formatted as `<PDM name> (PDM)`. Group commercial/public-sector variants under their segment family when needed and do not imply these are declared target segments.
 5. Better Together statement.
 6. Three large rounded solution cards connected by circular plus icons.
-7. Compact `Seller opportunity` strip with `Customer signal`, `Business outcome`, `Microsoft pull-through`, and `Incentive`.
+7. Compact `Seller opportunity` strip with `Customer signal`, `Business outcome`, `Microsoft pull-through`, `Incentive`, and `Next action`.
 8. Split middle section: left `When to engage` checklist, right `Key use cases` row.
 9. Small proof strip under use cases for the most relevant grounded commercial or quota signal.
 10. `Why sellers should care` section: three stacked signal -> impact -> Microsoft-motion cards on the left and a compact `Opportunity Signals` card on the right containing only `Co-sell contract value`, `Registered co-sell deals`, and `Partner Close Rate`. Format `Opportunity Signals` as a two-column list: large bold metric values in the left column and each signal title plus concise scope text in the right column, with subtle horizontal dividers between rows. Omit unavailable allowed fields. Keep this section vertically compact by minimizing margins and padding without reducing font or icon sizes.
@@ -465,6 +467,34 @@ Match the GitHub-hosted `partner-one-pager-template.html` as the visual source o
 - Keep all colors expressed through `var(--cp-*)` except inside trusted inline SVG logo artwork.
 - Keep validation caveats and internal-only provenance out of the rendered page; preserve them in the generation evidence and final response.
 
+## Partner profile JSON requirements
+
+Alongside the seller-facing HTML, generate a machine-readable partner profile JSON file named:
+
+```text
+[PARTNER NAME]-partner-profile.json
+```
+
+The JSON is an internal data artifact for downstream matching and retrieval. It must include:
+
+- `schemaVersion`
+- `generatedAt`
+- `partner` identity fields: PartnerOneID, PartnerOneName, display name, PMX partner management account used, subsegment, website, public marketplace publisher.
+- `renderedOnePager` fields: headline, summary, compact Hero Products, original RQA Hero Product labels, industries, customer segments, marketplace availability, solution cards, seller opportunity, engagement signals, use cases, seller reasons, CTA fields, internal contact.
+- `metrics` with numeric values and period/scope: PI ACR association mix, co-sell contract value, registered co-sell records, partner close rate breakdown, customer Azure consumption, marketplace billed sales, MACC/customer commitment context, credentials/designations.
+- `marketplaceOffers` with offer names, IDs, offer type, transactable/MACC/free plan/trial signals, storefronts, and public URLs when available.
+- `pmx` with selected PDM owner, PTS count/representative contact, primary partner contact, and project-context summary.
+- `evidence` as an array of source records. Every metric must preserve source system, query/filter context, period/as-of date, scope, confidence label, and any caveat.
+- `validation` with fields left as `Validate`, fields that returned `grounded (none)`, and any omitted Opportunity Signals.
+
+Rules:
+
+- Preserve original source labels in evidence even when the rendered one-pager uses compact labels.
+- Do not put secrets, bearer tokens, browser headers, raw network payloads, or unredacted temporary file paths in the JSON.
+- Do not copy confidential internal links into customer-facing CTA fields. Internal SharePoint, PMX, Lakehouse, and RQA links may be stored only as evidence context when useful and clearly marked internal.
+- Use stable numeric types for metrics, not formatted currency strings, and include separately formatted display values where helpful.
+- If a value is ambiguous, conflicting, or not retrievable, write `Validate`; if a source was queried and returned zero rows, write `grounded (none)`.
+
 ## SharePoint publishing requirements
 
 Save the finished HTML one-pager to the Partner One Pager SharePoint document library:
@@ -473,29 +503,45 @@ Save the finished HTML one-pager to the Partner One Pager SharePoint document li
 https://microsoft.sharepoint.com/teams/PartnerOnePager/Partner%20One%20Pagers/Forms/AllItems.aspx
 ```
 
-Use SharePoint-aware tooling for publishing. The SharePoint document library is the system of record; do not keep a separate local copy as the deliverable. If a local file must be created to support upload tooling, treat it as a temporary artifact and delete it after SharePoint upload and metadata verification succeeds.
+Save the generated partner profile JSON to the Partner Profile JSON SharePoint document library:
 
-For generated HTML one-pagers, use SharePoint REST `Files/add` as the preferred first-run upload path. Do not create an empty Graph DriveItem placeholder before streaming content; that can leave a 0-byte file if the follow-up upload fails. Use browser file chooser upload only as a user-approved fallback when Scout file uploads are enabled.
+```text
+https://microsoft.sharepoint.com/teams/PartnerOnePager/Partner%20Profile%20JSON/Forms/AllItems.aspx
+```
+
+Create or update the corresponding record in the Partner Matcher Index SharePoint list during the same publish operation:
+
+```text
+https://microsoft.sharepoint.com/teams/PartnerOnePager/Lists/Partner%20Matcher%20Index/AllItems.aspx
+```
+
+Use SharePoint-aware tooling for publishing. A complete publish includes all three steps: upload the HTML one-pager to `Partner One Pagers`, upload the JSON profile to `Partner Profile JSON`, and create or update the matching `Partner Matcher Index` row. The SharePoint document libraries and matcher index are the systems of record; do not keep a separate local copy as the deliverable. If local files must be created to support upload tooling, treat them as temporary artifacts and delete them after SharePoint upload and metadata/index verification succeeds.
+
+For generated HTML one-pagers and JSON profiles, use SharePoint REST `Files/add` as the preferred first-run upload path. Do not create an empty Graph DriveItem placeholder before streaming content; that can leave a 0-byte file if the follow-up upload fails. Use browser file chooser upload only as a user-approved fallback when Scout file uploads are enabled.
 
 ### Optimal upload path (choose by scenario)
 
 Pick the upload route by whether the target file already exists, to avoid slow retries:
 
-- Replacing a file that already exists in the library: prefer `workiq_upload_file` with the existing file's `sharePointUrl`, or `driveId + itemId`. This is the fastest no-browser path, but it only works against an item that already exists — it cannot reliably create a brand-new library file, and passing a not-yet-existing file URL returns access denied.
-- Creating a brand-new file (the common one-pager case): use the authenticated browser-side SharePoint REST `Files/add` flow below. Scout's current `workiq_upload_file` wrapper does not expose a create-in-folder operation (`driveId + parentFolderItemId + fileName`), so browser REST is the reliable first-run path today.
+- Replacing a file that already exists in the target library: prefer `workiq_upload_file` with the existing file's `sharePointUrl`, or `driveId + itemId`. This is the fastest no-browser path, but it only works against an item that already exists — it cannot reliably create a brand-new library file, and passing a not-yet-existing file URL returns access denied.
+- Creating a brand-new file (the common one-pager and JSON-profile case): use the authenticated browser-side SharePoint REST `Files/add` flow below. Scout's current `workiq_upload_file` wrapper does not expose a create-in-folder operation (`driveId + parentFolderItemId + fileName`), so browser REST is the reliable first-run path today.
 - If a direct Microsoft Graph upload tool is available (`PUT /drives/{driveId}/items/{folderItemId}:/{fileName}:/content` with the token handled internally), prefer it over the browser for new files. Do not scrape bearer tokens from browser sessions or token caches.
 
 Operational gotchas that cause slow retries — avoid them up front:
 
-- Write or copy the generated HTML into a browser-accessible root (the Microsoft Scout working directory), not a session-only `.scout` path. Playwright helper scripts can only read from allowed roots.
+- Write or copy the generated HTML and JSON into a browser-accessible root (the Microsoft Scout working directory), not a session-only `.scout` path. Playwright helper scripts can only read from allowed roots.
 - The outer Playwright runtime has no `require`, `process`, or `atob`. Pass the file as base64 into `page.evaluate` and decode with `atob` inside the page context; upload the resulting `Uint8Array` as the fetch body.
 - Do not rely on the OS file chooser (`browser_file_upload`); it is disabled unless the user enables Scout file uploads.
 - Build the SharePoint browser session once, then reuse it for the digest, upload, readback, and metadata update.
 
-1. Resolve the SharePoint library or site URL with `workiq_resolve_m365_link`, or use `workiq_list_sharepoint_lists` against the URL to locate the `Partner One Pagers` document library. Capture `siteId`, `driveId`, `listId`, existing filename state, and the server-relative folder path `/teams/PartnerOnePager/Partner One Pagers`. Treat the browser URL as an entry point only; after resolution, use the returned `siteId`, `driveId`, and `listId` for all follow-up schema, metadata, item lookup, and verification calls instead of reusing the `Forms/AllItems.aspx` URL.
-2. Preserve the human-readable filename `[PARTNER NAME]-one-pager.html`. If a file with the same name already exists, replace it only when the user explicitly asked to update/replace; otherwise create the smallest unused incremented filename, e.g. `[PARTNER NAME]-one-pager-2.html`.
+1. Resolve the SharePoint site with `workiq_list_sharepoint_lists` against `https://microsoft.sharepoint.com/teams/PartnerOnePager`. Locate these targets by display name or list name:
+   - `Partner One Pagers` document library, server-relative folder path `/teams/PartnerOnePager/Partner One Pagers`.
+   - `Partner Profile JSON` document library, server-relative folder path `/teams/PartnerOnePager/Partner Profile JSON`.
+   - `Partner Matcher Index` list.
+   Capture `siteId`, library/list IDs, existing filename state, and target web URLs. Treat `Forms/AllItems.aspx` and `AllItems.aspx` URLs as entry points only; after resolution, use the returned IDs and list/library names for follow-up schema, metadata, item lookup, and verification. If SharePoint reads are throttled, do not guess writes; report the throttling blocker.
+2. Preserve the human-readable filename `[PARTNER NAME]-one-pager.html` for HTML and `[PARTNER NAME]-partner-profile.json` for JSON. If a file with the same name already exists, replace it only when the user explicitly asked to update/replace; otherwise create the smallest unused incremented filename, e.g. `[PARTNER NAME]-one-pager-2.html` and `[PARTNER NAME]-partner-profile-2.json`.
 3. Ensure a browser session is signed into `https://microsoft.sharepoint.com/teams/PartnerOnePager`. Get a SharePoint request digest by POSTing to `https://microsoft.sharepoint.com/teams/PartnerOnePager/_api/contextinfo` with `credentials: 'include'` and `Accept: application/json;odata=nometadata`.
-4. Upload the actual HTML bytes directly to the library with SharePoint REST:
+4. Upload the actual HTML bytes directly to the HTML library with SharePoint REST:
 
    ```text
    POST https://microsoft.sharepoint.com/teams/PartnerOnePager/_api/web/GetFolderByServerRelativeUrl('/teams/PartnerOnePager/Partner%20One%20Pagers')/Files/add(url='[FILENAME].html',overwrite=[true|false])
@@ -506,12 +552,47 @@ Operational gotchas that cause slow retries — avoid them up front:
    Body: raw UTF-8 HTML bytes
    ```
 
-5. Verify the uploaded SharePoint drive item can be read back and that its `size` / `FileSizeDisplay` is non-zero and matches the local HTML byte length. If the uploaded file is 0 bytes, treat publishing as failed: delete or replace the placeholder before proceeding.
-6. Read the document library schema with `workiq_get_sharepoint_list_schema` and find the API-facing column whose display name is `PDM Owner`.
-7. Update the uploaded document's list item metadata so `PDM Owner` stores the resolved primary PDM for the one-pager record. If `PDM Owner` is a person field, resolve the PDM to a Microsoft 365 user and update the field with SharePoint `ValidateUpdateListItem`, using a value like `[{"Key":"i:0#.f|membership|alias@microsoft.com"}]`. If the column is text, store the normalized PDM display name string. Do not create or rename SharePoint columns unless the user explicitly asks.
-8. Verify the uploaded document item can be read back, `PDM Owner` metadata is populated, and the final file size remains non-zero. If upload or metadata update is blocked by permissions, throttling, missing tools, missing/ambiguous column schema, or an unsupported column type, report the blocker clearly and keep any temporary local file only if it is needed for user recovery.
+5. Upload the actual JSON bytes directly to the JSON library with SharePoint REST:
 
-Do not expose internal evidence notes inside the uploaded HTML. Store SharePoint metadata on the document library item only.
+   ```text
+   POST https://microsoft.sharepoint.com/teams/PartnerOnePager/_api/web/GetFolderByServerRelativeUrl('/teams/PartnerOnePager/Partner%20Profile%20JSON')/Files/add(url='[FILENAME].json',overwrite=[true|false])
+   Headers:
+   - Accept: application/json;odata=nometadata
+   - Content-Type: application/json
+   - X-RequestDigest: [FormDigestValue]
+   Body: raw UTF-8 JSON bytes
+   ```
+
+6. Verify both uploaded SharePoint drive items can be read back and that each `size` / `FileSizeDisplay` is non-zero and matches the local byte length. If either uploaded file is 0 bytes, treat publishing as failed: delete or replace the placeholder before proceeding.
+7. Read the `Partner One Pagers` document library schema with `workiq_get_sharepoint_list_schema` and find the API-facing column whose display name is `PDM Owner`.
+8. Update the uploaded HTML document's list item metadata so `PDM Owner` stores the resolved primary PDM for the one-pager record. If `PDM Owner` is a person field, resolve the PDM to a Microsoft 365 user and update the field with SharePoint `ValidateUpdateListItem`, using a value like `[{"Key":"i:0#.f|membership|alias@microsoft.com"}]`. If the column is text, store the normalized PDM display name string. Do not create or rename SharePoint columns unless the user explicitly asks.
+9. Upsert one item in the `Partner Matcher Index` list keyed by `PartnerOneID` when present; otherwise key by exact `PartnerName`. Use `workiq_get_sharepoint_list_schema` to confirm API-facing column names at runtime. The known API-facing columns are:
+   - `Title`: use `<PartnerName> (<PartnerOneID>)`.
+   - `PartnerOneID`
+   - `PartnerName`
+   - `Industries`
+   - `SolutionAreas`
+   - `UseCases`
+   - `MarketplaceOffers`
+   - `MACCEligible`
+   - `CoSellDealCount`
+   - `CoSellContractValueUSD`
+   - `PartnerCloseRate`
+   - `PDM`
+   - `SearchText`
+   - `ApprovalStatus`
+   - `IndexStatus`
+   - `ApprovedBy`
+   - `ApprovedDate`
+   - `LastIndexedDate`
+   - `SourceHtmlETag`
+   - `OnePagerUrl`
+   - `JsonUrl`
+
+   Populate the index from the same grounded profile JSON. Store list-like values as semicolon-separated text. At upload time set `ApprovalStatus` to `Pending`, set `IndexStatus` to `Pending Approval`, leave `ApprovedBy` and `ApprovedDate` blank unless they are already confirmed from SharePoint approval metadata, and set `LastIndexedDate` to `utcNow()`. Store the uploaded document ETag in `SourceHtmlETag`, the HTML URL in `OnePagerUrl`, and the JSON URL in `JsonUrl`. The approval Power Automate flow owns the post-approval update: approved one-pagers become `ApprovalStatus = Approved` and `IndexStatus = Current`; denied one-pagers become `ApprovalStatus = Needs Revision` and `IndexStatus = Needs Revision`.
+10. Verify the uploaded HTML document item can be read back, `PDM Owner` metadata is populated, the JSON document item can be read back, and the matcher-index item contains the expected PartnerOneID, URLs, key metrics, `ApprovalStatus = Pending`, and `IndexStatus = Pending Approval`. If upload, metadata update, or index upsert is blocked by permissions, throttling, missing tools, missing/ambiguous column schema, or an unsupported column type, report the blocker clearly and keep any temporary local files only if they are needed for user recovery.
+
+Do not expose internal evidence notes inside the uploaded HTML. Store full evidence in the JSON profile and operational routing values in SharePoint metadata/list fields only.
 
 ## Final response
 
@@ -519,4 +600,4 @@ Report back in three bullets or fewer:
 
 - SharePoint location or upload blocker
 - confirmed internal metrics used, with source systems
-- fields left as `Validate`, fields that returned `grounded (none)`, and the `PDM Owner` metadata value saved to SharePoint
+- fields left as `Validate`, fields that returned `grounded (none)`, the `PDM Owner` metadata value saved to SharePoint, JSON profile location, and Partner Matcher Index upsert status
