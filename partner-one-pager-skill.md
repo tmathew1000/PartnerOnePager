@@ -1,6 +1,6 @@
 ---
 name: "partner-one-pager"
-description: "Build a seller-facing Microsoft partner one-pager grounded in authenticated internal sources; resolves PartnerOneID, retrieves credentials, PI ACR, co-sell opportunity signals, marketplace offers, and PMX team context, then renders the canonical one-pager template."
+description: "Build a seller-facing Microsoft partner one-pager grounded in authenticated internal sources; resolves PartnerOneID, retrieves credentials, PI ACR, co-sell opportunity signals, RQA hero products, marketplace offers, and PMX team context, then renders the canonical one-pager template."
 ---
 
 # Partner one-pager
@@ -37,6 +37,7 @@ If the seller uploads or links an existing partner one-pager with the request, t
 - Authenticated backend sources are authoritative for numbers and key partner facts. Never preserve an uploaded one-pager's metric merely because it already appears in a seller asset.
 - Treat uploaded one-pager content as contextual evidence until each claim is confirmed, contradicted, or marked `Validate`.
 - The GitHub-hosted `partner-one-pager-template.html` structure must be followed exactly. Do not add, remove, rename, reorder, merge, or collapse template sections, cards, rows, labels, or placeholders unless the user explicitly asks for that template change. Fill every template placeholder with grounded content, `grounded (none)`, or `Validate` according to the classification rules.
+- Populate `Hero Products` only from the partner-scoped RQA Hero Product dropdown with Fiscal Year cleared to `All`; do not substitute Marketplace offers, uploaded product lists, or the FY27 primary-product measure.
 - Lead with customer and seller business impact, not product features.
 - Do not present pipeline value, partner revenue, Marketplace billed sales, or PAEC as quota retired. Label each amount by what it actually measures.
 - In Opportunity Signals, render only `Co-sell contract value`, `Registered co-sell deals`, and `Partner Close Rate`; do not add Marketplace billed sales, PAEC, partner revenue, customer Azure consumption, or any other metric to that section. Omit unavailable allowed fields instead of rendering a visible `Validate` row. Preserve the missing-field status in generation evidence and the final response.
@@ -83,10 +84,11 @@ Rules:
 
 1. Lakehouse (`lakehouse_status`, `lakehouse_query`) - PartnerOneID, Partner Center credentials, PI ACR, co-sell deals and opportunity status, marketplace billed sales, MACC/customer commitments where available.
 2. PMX tools - partner management accounts, account team, contacts, projects, deliverables.
-3. Marketplace tools - public offers, transactable status, offer-level MACC eligibility.
-4. Public web - positioning, website, logo, public proof points, customer-safe CTAs.
+3. RQA Qualify report - partner-scoped Hero Product dropdown values with Fiscal Year set to `All`.
+4. Marketplace tools - public offers, transactable status, offer-level MACC eligibility.
+5. Public web - positioning, website, logo, public proof points, customer-safe CTAs.
 
-If Lakehouse is unavailable, say so and continue in public-only mode. All fields requiring internal grounding must be labelled `Validate`.
+If Lakehouse is unavailable, say so and continue with any connected PMX, RQA, Marketplace, and public sources. Fields that specifically require Lakehouse grounding must be labelled `Validate`.
 
 ## Uploaded one-pager workflow
 
@@ -94,7 +96,7 @@ When an existing partner one-pager is supplied:
 
 1. Read it before gathering new content and extract its partner identity, value proposition, solution plays, industries, customer segments, use cases, proof points, metrics, incentives, contacts, CTAs, links, logos, and source dates.
 2. Reuse pertinent seller-facing context when it remains relevant, especially positioning, solution narratives, customer signals, use cases, approved branding, and useful CTAs.
-3. Independently retrieve all numbers and key facts from Lakehouse, PMX, Marketplace, and current public sources. Backend-grounded values replace uploaded values.
+3. Independently retrieve all numbers and key facts from Lakehouse, PMX, RQA, Marketplace, and current public sources. Backend-grounded values replace uploaded values.
 4. Reconcile material differences. Do not silently carry forward or silently overwrite conflicting claims:
    - backend confirms the claim: use the backend value and current source date
    - backend provides a newer or differently scoped value: use it and retain the scope/date difference in the generation evidence
@@ -379,7 +381,28 @@ Persist the resolved primary PDM as the `PDM Owner` value for downstream SharePo
 
 Keep larger team lists and routing details out of the one-pager body.
 
-### 9. Gather public positioning
+### 9. Retrieve RQA Hero Products
+
+Use the authenticated RQA Qualify report:
+
+```text
+https://msit.powerbi.com/groups/me/apps/a53cc2f2-af44-4451-b109-f48b0a7cd4e7/reports/3691bc09-1cd6-4161-98f0-75e8b8e6c4a5/7979e8d75d9d547bc19e?ctid=72f988bf-86f1-41af-91ab-2d7cd011db47&experience=power-bi
+```
+
+Retrieve the values for the `Hero Products` Partner Snapshot field as follows:
+
+1. Open `Qualify - OKR2` in the existing authenticated Microsoft work session.
+2. Set `PartnerOne Name` to the exact partner name used for the one-pager. Confirm the slicer shows that partner before reading product values.
+3. Clear the `Fiscal Year` slicer and any page/report-level Fiscal Year filter so the report shows `All`. Do not default this lookup to FY27.
+4. Clear any existing Hero Product selection so the `Hero Product` slicer shows `All`, then open its dropdown.
+5. Capture every selectable Hero Product value available for that partner, excluding `All` and blanks. Deduplicate exact labels and preserve the report's spelling and punctuation.
+6. Prefer the dropdown/model data over screenshot interpretation. If the dropdown is virtualized or truncated, capture an authenticated Power BI visual query and query `DimHeroProduct[Hero Product]` with `RPO[PartnerOne Name]` equal to the partner and `DimPCMGroup[Group Name]` equal to `OKR2`, with no Fiscal Year condition.
+
+The Hero Product dropdown is not the same as the `_Measures[# Primary Hero Products for FY27]` card. Do not use that FY27 measure to populate `Hero Products`, and do not discard valid dropdown values when the primary-product card is blank.
+
+Render the distinct values as a concise semicolon-separated list in `{{HERO_PRODUCTS}}` and record the evidence as `RQA Qualify - OKR2; Fiscal Year: All; PartnerOne Name: <partner>`. If the authenticated, partner-filtered dropdown returns no values, render `grounded (none)`. If RQA is inaccessible or the partner filter cannot be confirmed, render `Validate`.
+
+### 10. Gather public positioning
 
 Use marketplace and public web sources for customer-safe positioning:
 
@@ -418,7 +441,7 @@ Use a single portrait page, approximately 980px wide and 1280px tall, with this 
 1. `Microsoft Confidential` pill at the top.
 2. Top logo row with partner logo and Microsoft logo separated by a vertical divider.
 3. Top-right slanted/parallelogram category ribbon.
-4. Hero section with large partner + Microsoft title, blue headline, short summary, and a right-side rounded Partner Snapshot card. The left hero block and Partner Snapshot card must have matching heights. Size and vertically center the snapshot text so it uses the available card space without overflowing. Include `Customer segments` populated from observed attributed ACR or co-sell activity and `Internal Contact` populated from the primary PDM in PMX, formatted as `<PDM name> (PDM)`. Group commercial/public-sector variants under their segment family when needed and do not imply these are declared target segments.
+4. Hero section with large partner + Microsoft title, blue headline, short summary, and a right-side rounded Partner Snapshot card. The left hero block and Partner Snapshot card must have matching heights. Size and vertically center the snapshot text so it uses the available card space without overflowing. Include `Hero Products` populated from the RQA Hero Product dropdown with Fiscal Year set to `All`, `Customer segments` populated from observed attributed ACR or co-sell activity, and `Internal Contact` populated from the primary PDM in PMX, formatted as `<PDM name> (PDM)`. Group commercial/public-sector variants under their segment family when needed and do not imply these are declared target segments.
 5. Better Together statement.
 6. Three large rounded solution cards connected by circular plus icons.
 7. Compact `Seller opportunity` strip with `Customer signal`, `Business outcome`, `Microsoft pull-through`, and `Incentive`.
