@@ -265,6 +265,8 @@ marketplace_search_offers publisher: "<exact publisher display name>"
 
 Publisher matching is exact and case-sensitive. MACC eligibility is per offer; never render a partner-level `MACC: Yes` unless every referenced offer supports that claim or the wording names the eligible offers.
 
+Marketplace Partner Directory is optional public evidence, separate from the Azure Marketplace offer catalog. Use it only when partner-directory profile fields are needed, such as public competencies, designations, endorsed products, locations, or contacts. If the directory search does not return the partner but the offer catalog confirms the publisher/offers, continue with offer-catalog evidence and mark the directory result as `grounded (none)` in generation evidence; do not treat that as a Marketplace presence failure.
+
 For ISVs, retrieve marketplace billed sales when available:
 
 ```sql
@@ -452,7 +454,7 @@ Use SharePoint-aware tooling for publishing. The SharePoint document library is 
 
 For generated HTML one-pagers, use SharePoint REST `Files/add` as the preferred first-run upload path. Do not create an empty Graph DriveItem placeholder before streaming content; that can leave a 0-byte file if the follow-up upload fails. Use browser file chooser upload only as a user-approved fallback when Scout file uploads are enabled.
 
-1. Resolve the SharePoint library or site URL with `workiq_resolve_m365_link`, or use `workiq_list_sharepoint_lists` against the URL to locate the `Partner One Pagers` document library. Capture `siteId`, `driveId`, `listId`, existing filename state, and the server-relative folder path `/teams/PartnerOnePager/Partner One Pagers`.
+1. Resolve the SharePoint library or site URL with `workiq_resolve_m365_link`, or use `workiq_list_sharepoint_lists` against the URL to locate the `Partner One Pagers` document library. Capture `siteId`, `driveId`, `listId`, existing filename state, and the server-relative folder path `/teams/PartnerOnePager/Partner One Pagers`. Treat the browser URL as an entry point only; after resolution, use the returned `siteId`, `driveId`, and `listId` for all follow-up schema, metadata, item lookup, and verification calls instead of reusing the `Forms/AllItems.aspx` URL.
 2. Preserve the human-readable filename `[PARTNER NAME]-one-pager.html`. If a file with the same name already exists, replace it only when the user explicitly asked to update/replace; otherwise create the smallest unused incremented filename, e.g. `[PARTNER NAME]-one-pager-2.html`.
 3. Ensure a browser session is signed into `https://microsoft.sharepoint.com/teams/PartnerOnePager`. Get a SharePoint request digest by POSTing to `https://microsoft.sharepoint.com/teams/PartnerOnePager/_api/contextinfo` with `credentials: 'include'` and `Accept: application/json;odata=nometadata`.
 4. Upload the actual HTML bytes directly to the library with SharePoint REST:
