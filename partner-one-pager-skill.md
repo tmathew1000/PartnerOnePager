@@ -40,7 +40,7 @@ If the seller uploads or links an existing partner one-pager with the request, t
 - Populate `Hero Products` only from the partner-scoped RQA Hero Product dropdown with Fiscal Year cleared to `All`; do not substitute Marketplace offers, uploaded product lists, or the FY27 primary-product measure.
 - Lead with customer and seller business impact, not product features.
 - Do not present pipeline value, partner revenue, Marketplace billed sales, or PAEC as quota retired. Label each amount by what it actually measures.
-- In Opportunity Signals, render only `Co-sell contract value`, `Registered co-sell deals`, and `Partner Close Rate`; do not add Marketplace billed sales, PAEC, partner revenue, customer Azure consumption, or any other metric to that section. Omit unavailable allowed fields instead of rendering a visible `Validate` row. Preserve the missing-field status in generation evidence and the final response.
+- In Opportunity Signals, render only `Co-sell contract value`, `Registered co-sell deals`, `Partner Close Rate`, and `MACC Eligibility`; do not add Marketplace billed sales, PAEC, partner revenue, customer Azure consumption, or any other metric to that section. Omit unavailable allowed fields instead of rendering a visible `Validate` row. Preserve the missing-field status in generation evidence and the final response.
 
 ## Business impact contract
 
@@ -174,8 +174,9 @@ Render one compact `Opportunity Signals` block. Its fields are:
 1. `Co-sell contract value`
 2. `Registered co-sell deals`
 3. `Partner Close Rate`
+4. `MACC Eligibility`
 
-These are the only fields allowed in the rendered `Opportunity Signals` section. Do not include `Marketplace billed sales`, `PAEC`, partner revenue, customer Azure consumption, marketplace ACR, MACC values, or any other commercial metric in this section. Those signals may be used in the proof strip, seller reasons, or generation evidence when relevant and properly labeled.
+These are the only fields allowed in the rendered `Opportunity Signals` section. Do not include `Marketplace billed sales`, `PAEC`, partner revenue, customer Azure consumption, marketplace ACR, customer MACC commitment values, or any other commercial metric in this section. Those signals may be used in the proof strip, seller reasons, or generation evidence when relevant and properly labeled.
 
 Use one row per `PSXDealID` before aggregating contract value:
 
@@ -237,6 +238,14 @@ Render `Partner Close Rate` as the percentage value only, e.g. `<win rate>%`. Us
 
 `Billed_Revenue_Status` is the MSX `Billed Status` field. Do not treat `Closed`, `Open`, `In-Progress`, `N/A`, or any non-won status as `Won`; `Closed` alone is not a win unless another referral/co-sell or MSX status is explicitly `Won`. If no referral/co-sell records with either Partner Referral ID or MSX Opportunity ID exist, omit Partner Close Rate from the rendered page and report `grounded (none)` in the final response.
 
+Render `MACC Eligibility` from Azure Marketplace offer-catalog evidence only. Use each referenced offer's `isMacc` flag; do not infer partner-level eligibility from customer MACC commitments, marketplace billed sales, Partner Center designations, or an uploaded seller asset. Render the metric value as:
+
+- `Yes` when every referenced Marketplace offer in the one-pager is MACC eligible.
+- `Partial` when at least one referenced offer is MACC eligible and at least one referenced offer is not.
+- `No` when referenced Marketplace offers are found and none are MACC eligible.
+
+Use concise scope text such as `All referenced Marketplace offers`, `Eligible: <offer names>; not eligible: <offer names>`, or `Referenced Marketplace offers not MACC eligible`. If Marketplace offer lookup is unavailable or no referenced Marketplace offers can be grounded, omit the row from the rendered page and report `Validate` or `grounded (none)` in the final response and generation evidence as appropriate.
+
 ### 5. Retrieve PI ACR and association mix
 
 Compute totals from `pov.factaggregatedacr_pat` only; do not inner join customer dimensions when calculating totals.
@@ -267,7 +276,7 @@ Use marketplace search for public offers:
 marketplace_search_offers publisher: "<exact publisher display name>"
 ```
 
-Publisher matching is exact and case-sensitive. MACC eligibility is per offer; never render a partner-level `MACC: Yes` unless every referenced offer supports that claim or the wording names the eligible offers.
+Publisher matching is exact and case-sensitive. MACC eligibility is per offer; render Opportunity Signals `MACC Eligibility` as `Yes` only when every referenced Marketplace offer supports that claim, otherwise use `Partial` or `No` with offer-level scope.
 
 Marketplace Partner Directory is optional public evidence, separate from the Azure Marketplace offer catalog. Use it only when partner-directory profile fields are needed, such as public competencies, designations, endorsed products, locations, or contacts. If the directory search does not return the partner but the offer catalog confirms the publisher/offers, continue with offer-catalog evidence and mark the directory result as `grounded (none)` in generation evidence; do not treat that as a Marketplace presence failure.
 
@@ -449,7 +458,7 @@ Use a single portrait page, approximately 980px wide and 1280px tall, with this 
 7. Compact `Seller opportunity` strip with `Customer signal`, `Business outcome`, `Microsoft pull-through`, `Incentive`, and `Next action`.
 8. Split middle section: left `When to engage` checklist, right `Key use cases` row.
 9. Small proof strip under use cases for the most relevant grounded commercial or quota signal.
-10. `Why sellers should care` section: three stacked signal -> impact -> Microsoft-motion cards on the left and a compact `Opportunity Signals` card on the right containing only `Co-sell contract value`, `Registered co-sell deals`, and `Partner Close Rate`. Format `Opportunity Signals` as a two-column list: large bold metric values in the left column and each signal title plus concise scope text in the right column, with subtle horizontal dividers between rows. Omit unavailable allowed fields. Keep this section vertically compact by minimizing margins and padding without reducing font or icon sizes.
+10. `Why sellers should care` section: three stacked signal -> impact -> Microsoft-motion cards on the left and a compact `Opportunity Signals` card on the right containing only `Co-sell contract value`, `Registered co-sell deals`, `Partner Close Rate`, and `MACC Eligibility`. Format `Opportunity Signals` as a two-column list: large bold metric values in the left column and each signal title plus concise scope text in the right column, with subtle horizontal dividers between rows. Omit unavailable allowed fields. Keep this section vertically compact by minimizing margins and padding without reducing font or icon sizes.
 11. Rounded Call to Action footer with partner logo, CTA copy and links, and Microsoft logo.
 12. Compact footer with copyright/update date. Do not render a visible source or validation note.
 
