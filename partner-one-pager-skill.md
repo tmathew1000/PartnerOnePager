@@ -1,6 +1,6 @@
 ---
 name: "partner-one-pager"
-description: "Build a seller-facing Microsoft partner one-pager, grounded in authenticated internal sources. Resolves the partner to a PartnerOneID, retrieves Partner Center specializations and designations, Partner-Influenced ACR, co-sell opportunity signals, marketplace offers and the PMX partner team — each with a source and an explicit confidence — then renders using the canonical partner one-pager template. WHEN the user asks to \"create a partner one-pager\", \"build a partner brief\", \"make a battlecard\","
+description: "Build a seller-facing Microsoft partner one-pager grounded in authenticated internal sources; resolves PartnerOneID, retrieves credentials, PI ACR, co-sell opportunity signals, marketplace offers, and PMX team context, then renders the canonical one-pager template."
 ---
 
 # Partner one-pager
@@ -36,6 +36,7 @@ If the seller uploads or links an existing partner one-pager with the request, t
 - Compute financial totals from fact tables before joining dimensions; use dimensions only for labels and state match rate when displaying dimension-derived names.
 - Authenticated backend sources are authoritative for numbers and key partner facts. Never preserve an uploaded one-pager's metric merely because it already appears in a seller asset.
 - Treat uploaded one-pager content as contextual evidence until each claim is confirmed, contradicted, or marked `Validate`.
+- The GitHub-hosted `partner-one-pager-template.html` structure must be followed exactly. Do not add, remove, rename, reorder, merge, or collapse template sections, cards, rows, labels, or placeholders unless the user explicitly asks for that template change. Fill every template placeholder with grounded content, `grounded (none)`, or `Validate` according to the classification rules.
 - Lead with customer and seller business impact, not product features.
 - Do not present pipeline value, partner revenue, Marketplace billed sales, or PAEC as quota retired. Label each amount by what it actually measures.
 - In Opportunity Signals, render only `Co-sell contract value`, `Registered co-sell deals`, and `Partner Close Rate`; do not add Marketplace billed sales, PAEC, partner revenue, customer Azure consumption, or any other metric to that section. Omit unavailable allowed fields instead of rendering a visible `Validate` row. Preserve the missing-field status in generation evidence and the final response.
@@ -48,10 +49,10 @@ Use these formulas to keep the one-pager seller-focused:
 | --- | --- |
 | Headline | `Help <customer type> achieve <business outcome> with <joint solution>` |
 | Use case | `<Action> to <measurable customer outcome>` |
-| Seller reason | `<Buying signal> → <customer impact> → <Microsoft motion>` |
-| Proof | `<Metric> · <period> · <scope> · <confidence>` |
-| Incentive | `<Program> · <eligibility status> · <maximum benefit when verified>` |
-| CTA | `Target <account type> → position <offer> → use <incentive> → contact <owner>` |
+| Seller reason | `<Buying signal> -> <customer impact> -> <Microsoft motion>` |
+| Proof | `<Metric> - <period> - <scope> - <confidence>` |
+| Incentive | `<Program> - <eligibility status> - <maximum benefit when verified>` |
+| CTA | `Target <account type> -> position <offer> -> use <incentive> -> contact <owner>` |
 
 Render a compact `Seller opportunity` strip with five fields:
 
@@ -81,10 +82,10 @@ Rules:
 
 ## Source priority
 
-1. Lakehouse (`lakehouse_status`, `lakehouse_query`) — PartnerOneID, Partner Center credentials, PI ACR, co-sell deals and opportunity status, marketplace billed sales, MACC/customer commitments where available.
-2. PMX tools — partner management accounts, account team, contacts, projects, deliverables.
-3. Marketplace tools — public offers, transactable status, offer-level MACC eligibility.
-4. Public web — positioning, website, logo, public proof points, customer-safe CTAs.
+1. Lakehouse (`lakehouse_status`, `lakehouse_query`) - PartnerOneID, Partner Center credentials, PI ACR, co-sell deals and opportunity status, marketplace billed sales, MACC/customer commitments where available.
+2. PMX tools - partner management accounts, account team, contacts, projects, deliverables.
+3. Marketplace tools - public offers, transactable status, offer-level MACC eligibility.
+4. Public web - positioning, website, logo, public proof points, customer-safe CTAs.
 
 If Lakehouse is unavailable, say so and continue in public-only mode. All fields requiring internal grounding must be labelled `Validate`.
 
@@ -171,7 +172,7 @@ Render one compact `Opportunity Signals` block. Its fields are:
 2. `Registered co-sell deals`
 3. `Partner Close Rate`
 
-These are the only fields allowed in the rendered `Opportunity Signals` section. Do not include `Marketplace billed sales`, `PAEC`, partner revenue, customer Azure consumption, marketplace ACR, MACC values, or any other commercial metric in this section. Those signals may be used in the proof strip, marketplace/MACC callout, seller reasons, or generation evidence when relevant and properly labeled.
+These are the only fields allowed in the rendered `Opportunity Signals` section. Do not include `Marketplace billed sales`, `PAEC`, partner revenue, customer Azure consumption, marketplace ACR, MACC values, or any other commercial metric in this section. Those signals may be used in the proof strip, seller reasons, or generation evidence when relevant and properly labeled.
 
 Use one row per `PSXDealID` before aggregating contract value:
 
@@ -190,41 +191,48 @@ FROM deals
 
 Label co-sell contract value as pipeline or commercial potential, not quota retired.
 
-Compute `Partner Close Rate` at the distinct MSX opportunity grain for the current and prior Microsoft fiscal years:
+Compute `Partner Close Rate` as the co-sell/referral win rate: the percentage of distinct partner referral/co-sell records with either a Partner Referral ID or linked MSX Opportunity ID that are marked `Won` in Partner Center/co-sell status or have a linked MSX opportunity with MSX, billed revenue, or consumption status marked `Won`.
+
+Use the denominator as all distinct referral/co-sell records where either `PSXDealID` (Partner Referral ID) or `OpportunityID` (MSX Opportunity ID) is present. Count a win when either the referral/co-sell status is won or the linked MSX opportunity status is won. Include records with and without linked MSX Opportunity IDs.
 
 ```sql
-WITH partner_opportunities AS (
-  SELECT DISTINCT f.OpportunityID
-  FROM crm.factcoselldeal f
-  JOIN crm.dimcoselldeal d ON d.PSXDealID = f.PSXDealID
-  WHERE f.PartnerOneID = @PartnerOneID
-    AND f.IPPartnerOneID = @PartnerOneID
-    AND f.IPCoSellPartnerOneKey = @PartnerOneID
-    AND d.CreatedFiscalYear IN (@prior_fy, @current_fy)
-    AND d.Status = 'Active'
-    AND d.PartnerAcceptanceStatus IN ('Accepted', 'Won')
-    AND f.OpportunityID IS NOT NULL
-),
-scored AS (
-  SELECT p.OpportunityID,
+WITH records AS (
+  SELECT COALESCE(f.PSXDealID, f.OpportunityID) AS record_id,
+         MAX(f.OpportunityID) AS opportunity_id,
          MAX(CASE
-           WHEN o.Billed_Revenue_Status = 'Won'
+           WHEN d.Close_Status = 'Won'
+             OR d.Status = 'Won'
+             OR d.PartnerAcceptanceStatus = 'Won'
+             OR o.MSX_Status = 'Won'
+             OR o.Billed_Revenue_Status = 'Won'
              OR o.Consumption_Status = 'Won'
            THEN 1 ELSE 0
-         END) AS IsWon
-  FROM partner_opportunities p
-  LEFT JOIN crm.dimopportunity o
-    ON o.Opportunity_Number = p.OpportunityID
-  GROUP BY p.OpportunityID
+         END) AS is_won
+  FROM crm.factcoselldeal f
+  LEFT JOIN crm.dimcoselldeal d ON d.PSXDealID = f.PSXDealID
+  LEFT JOIN crm.dimopportunity o ON o.Opportunity_Number = f.OpportunityID
+  WHERE f.PartnerOneID = @PartnerOneID
+    AND (f.PSXDealID IS NOT NULL OR f.OpportunityID IS NOT NULL)
+  GROUP BY COALESCE(f.PSXDealID, f.OpportunityID)
 )
-SELECT COUNT(*) AS qualifying_opportunities,
-       SUM(IsWon) AS won_opportunities,
-       CAST(100.0 * SUM(IsWon) / NULLIF(COUNT(*), 0) AS decimal(5,2))
-         AS partner_close_rate_pct
-FROM scored
+SELECT COUNT(*) AS total_referral_cosell_records,
+       SUM(is_won) AS won_referral_cosell_records,
+       CAST(100.0 * SUM(is_won) / NULLIF(COUNT(*), 0) AS decimal(6,2))
+         AS partner_close_rate_pct,
+       SUM(CASE WHEN opportunity_id IS NOT NULL THEN 1 ELSE 0 END)
+         AS records_with_msx_opportunity_id,
+       SUM(CASE WHEN opportunity_id IS NULL THEN 1 ELSE 0 END)
+         AS records_without_msx_opportunity_id,
+       SUM(CASE WHEN is_won = 1 AND opportunity_id IS NOT NULL THEN 1 ELSE 0 END)
+         AS wins_with_msx_opportunity_id,
+       SUM(CASE WHEN is_won = 1 AND opportunity_id IS NULL THEN 1 ELSE 0 END)
+         AS wins_without_msx_opportunity_id
+FROM records
 ```
 
-`Billed_Revenue_Status` is the MSX `Billed Status` field. Do not treat `Closed`, `Open`, `In-Progress`, `N/A`, or a deal-level acceptance status as `Won`. Show the numerator, denominator, fiscal-year scope, and formula beside the percentage. If no qualifying opportunities exist, omit Partner Close Rate from the rendered page and report `grounded (none)` in the final response.
+Render `Partner Close Rate` as the percentage value only, e.g. `<win rate>%`. Use this scope text format: `<wins> won / <total referral/co-sell records> opportunities`. Preserve the with-MSX-ID vs without-MSX-ID numerator and denominator breakdown in generation evidence and final response when relevant.
+
+`Billed_Revenue_Status` is the MSX `Billed Status` field. Do not treat `Closed`, `Open`, `In-Progress`, `N/A`, or any non-won status as `Won`; `Closed` alone is not a win unless another referral/co-sell or MSX status is explicitly `Won`. If no referral/co-sell records with either Partner Referral ID or MSX Opportunity ID exist, omit Partner Close Rate from the rendered page and report `grounded (none)` in the final response.
 
 ### 5. Retrieve PI ACR and association mix
 
@@ -274,11 +282,11 @@ Report marketplace ACR and marketplace billed sales as separate metrics.
 
 Retrieve and display available monetary fields in this priority order:
 
-1. **Customer Azure consumption** — `TrueACRConsumption` or another grounded customer ACR measure attributable to the partner offering. This is the strongest Azure quota-retirement signal.
-2. **Marketplace billed sales** — useful for Marketplace commercial motions, but do not imply it necessarily retires Azure consumption quota.
-3. **Co-sell contract value** — `TotalContractValueCD`, deduplicated to one row per `PSXDealID`; label as pipeline or commercial potential, not quota retired.
-4. **Partner revenue** — `PartnerRevenueinUSD` or `Potential_Partner_Revenue_in_USD`, deduplicated to one row per `PSXDealID`; label as partner economics, not Microsoft quota.
-5. **PAEC** — ACR under `Partner As End Customer`; label as partner self-consumption, not customer-offering pull-through.
+1. Customer Azure consumption - `TrueACRConsumption` or another grounded customer ACR measure attributable to the partner offering. This is the strongest Azure quota-retirement signal.
+2. Marketplace billed sales - useful for Marketplace commercial motions, but do not imply it necessarily retires Azure consumption quota.
+3. Co-sell contract value - `TotalContractValueCD`, deduplicated to one row per `PSXDealID`; label as pipeline or commercial potential, not quota retired.
+4. Partner revenue - `PartnerRevenueinUSD` or `Potential_Partner_Revenue_in_USD`, deduplicated to one row per `PSXDealID`; label as partner economics, not Microsoft quota.
+5. PAEC - ACR under `Partner As End Customer`; label as partner self-consumption, not customer-offering pull-through.
 
 Use a deal-level CTE before summing co-sell values:
 
@@ -318,9 +326,9 @@ When `PartnerSubSegment` is `ISV` or `GISV`, evaluate FY27 SDC / Frontier Accele
 
 Render incentive status as exactly one of:
 
-- `Confirmed eligible` — all required gates are grounded
-- `Potential fit — validate` — partner type or commercial signal aligns, but one or more gates are not confirmed
-- `Not evidenced` — reachable sources do not show the required gates
+- `Confirmed eligible` - all required gates are grounded
+- `Potential fit - validate` - partner type or commercial signal aligns, but one or more gates are not confirmed
+- `Not evidenced` - reachable sources do not show the required gates
 
 Relevant seller plays may include AI Build & Publish, Copilot Agent publishing, Azure sponsorship, pre-sales assessments, and Customer Migrate & Modernize. Show maximum benefits only when verified from a current FY27 source. Incentives facilitate assessment, build, publishing, migration, and deployment; do not describe incentive funding itself as quota retirement.
 
@@ -366,6 +374,8 @@ Render only the seller-facing team summary:
 - PTS count, plus one named technical contact when identifiable
 - primary partner-side contact when present
 
+Persist the resolved primary PDM as the `PDM Owner` value for downstream SharePoint storage. Use the PMX `_gps_primarypdm_value@OData.Community.Display.V1.FormattedValue` / `partnerAccountOwner` value as the preferred source, normalized to the display name without duplicating the role suffix. If multiple PMX partner management accounts exist, choose the primary PDM from the PMA record used for the rendered `Internal Contact`; if no single PMA is chosen, prefer the PMA with active project context and record the alternative PDMs in generation evidence.
+
 Keep larger team lists and routing details out of the one-pager body.
 
 ### 9. Gather public positioning
@@ -398,6 +408,8 @@ https://github.com/tmathew1000/PartnerOnePager/blob/main/partner-one-pager-templ
 
 The template is named `partner-one-pager-template.html` and is the sole authority for the reusable HTML structure, visual styling, Microsoft logo SVG, iconography, proportions, spacing, and replacement placeholders. Read the GitHub template before rendering every partner one-pager. If the template cannot be accessed, report that limitation rather than silently using a stale local copy.
 
+Render by filling the canonical GitHub template, not by recreating or hand-authoring an approximate layout. The rendered HTML must preserve the template's section order, Partner Snapshot rows, Seller opportunity fields, Opportunity Signals rows, CTA structure, labels, and placeholder-to-content mapping exactly. If a field is unavailable, keep the template field and populate it with `Validate` or omit only where the skill explicitly says omission is allowed.
+
 ### Required page structure
 
 Use a single portrait page, approximately 980px wide and 1280px tall, with this order:
@@ -411,10 +423,9 @@ Use a single portrait page, approximately 980px wide and 1280px tall, with this 
 7. Compact `Seller opportunity` strip with `Customer signal`, `Business outcome`, `Microsoft pull-through`, `Incentive`, and `Next action`.
 8. Split middle section: left `When to engage` checklist, right `Key use cases` row.
 9. Small proof strip under use cases for the most relevant grounded commercial or quota signal.
-10. `Why sellers should care` section: three stacked signal → impact → Microsoft-motion cards on the left and a compact `Opportunity Signals` list on the right containing only `Co-sell contract value`, `Registered co-sell deals`, and `Partner Close Rate`. Omit unavailable allowed fields. Keep this section vertically compact by minimizing margins and padding without reducing font or icon sizes.
-11. Marketplace / MACC / transactable callout strip.
-12. Rounded Call to Action footer with partner logo, CTA copy and links, and Microsoft logo.
-13. Compact footer with copyright/update date. Do not render a visible source or validation note.
+10. `Why sellers should care` section: three stacked signal -> impact -> Microsoft-motion cards on the left and a compact `Opportunity Signals` card on the right containing only `Co-sell contract value`, `Registered co-sell deals`, and `Partner Close Rate`. Format `Opportunity Signals` as a two-column list: large bold metric values in the left column and each signal title plus concise scope text in the right column, with subtle horizontal dividers between rows. Omit unavailable allowed fields. Keep this section vertically compact by minimizing margins and padding without reducing font or icon sizes.
+11. Rounded Call to Action footer with partner logo, CTA copy and links, and Microsoft logo.
+12. Compact footer with copyright/update date. Do not render a visible source or validation note.
 
 Keep copy concise: 3 seller reasons, 4 use cases, 5 engagement signals, and 3 CTA links maximum.
 
@@ -430,10 +441,43 @@ Match the GitHub-hosted `partner-one-pager-template.html` as the visual source o
 - Keep all colors expressed through `var(--cp-*)` except inside trusted inline SVG logo artwork.
 - Keep validation caveats and internal-only provenance out of the rendered page; preserve them in the generation evidence and final response.
 
+## SharePoint publishing requirements
+
+Save the finished HTML one-pager to the Partner One Pager SharePoint document library:
+
+```text
+https://microsoft.sharepoint.com/teams/PartnerOnePager/Partner%20One%20Pagers/Forms/AllItems.aspx
+```
+
+Use SharePoint-aware tooling for publishing. The SharePoint document library is the system of record; do not keep a separate local copy as the deliverable. If a local file must be created to support upload tooling, treat it as a temporary artifact and delete it after SharePoint upload and metadata verification succeeds.
+
+For generated HTML one-pagers, use SharePoint REST `Files/add` as the preferred first-run upload path. Do not create an empty Graph DriveItem placeholder before streaming content; that can leave a 0-byte file if the follow-up upload fails. Use browser file chooser upload only as a user-approved fallback when Scout file uploads are enabled.
+
+1. Resolve the SharePoint library or site URL with `workiq_resolve_m365_link`, or use `workiq_list_sharepoint_lists` against the URL to locate the `Partner One Pagers` document library. Capture `siteId`, `driveId`, `listId`, existing filename state, and the server-relative folder path `/teams/PartnerOnePager/Partner One Pagers`.
+2. Preserve the human-readable filename `[PARTNER NAME]-one-pager.html`. If a file with the same name already exists, replace it only when the user explicitly asked to update/replace; otherwise create the smallest unused incremented filename, e.g. `[PARTNER NAME]-one-pager-2.html`.
+3. Ensure a browser session is signed into `https://microsoft.sharepoint.com/teams/PartnerOnePager`. Get a SharePoint request digest by POSTing to `https://microsoft.sharepoint.com/teams/PartnerOnePager/_api/contextinfo` with `credentials: 'include'` and `Accept: application/json;odata=nometadata`.
+4. Upload the actual HTML bytes directly to the library with SharePoint REST:
+
+   ```text
+   POST https://microsoft.sharepoint.com/teams/PartnerOnePager/_api/web/GetFolderByServerRelativeUrl('/teams/PartnerOnePager/Partner%20One%20Pagers')/Files/add(url='[FILENAME].html',overwrite=[true|false])
+   Headers:
+   - Accept: application/json;odata=nometadata
+   - Content-Type: text/html
+   - X-RequestDigest: [FormDigestValue]
+   Body: raw UTF-8 HTML bytes
+   ```
+
+5. Verify the uploaded SharePoint drive item can be read back and that its `size` / `FileSizeDisplay` is non-zero and matches the local HTML byte length. If the uploaded file is 0 bytes, treat publishing as failed: delete or replace the placeholder before proceeding.
+6. Read the document library schema with `workiq_get_sharepoint_list_schema` and find the API-facing column whose display name is `PDM Owner`.
+7. Update the uploaded document's list item metadata so `PDM Owner` stores the resolved primary PDM for the one-pager record. If `PDM Owner` is a person field, resolve the PDM to a Microsoft 365 user and update the field with SharePoint `ValidateUpdateListItem`, using a value like `[{"Key":"i:0#.f|membership|alias@microsoft.com"}]`. If the column is text, store the normalized PDM display name string. Do not create or rename SharePoint columns unless the user explicitly asks.
+8. Verify the uploaded document item can be read back, `PDM Owner` metadata is populated, and the final file size remains non-zero. If upload or metadata update is blocked by permissions, throttling, missing tools, missing/ambiguous column schema, or an unsupported column type, report the blocker clearly and keep any temporary local file only if it is needed for user recovery.
+
+Do not expose internal evidence notes inside the uploaded HTML. Store SharePoint metadata on the document library item only.
+
 ## Final response
 
 Report back in three bullets or fewer:
 
-- saved path and clickable file link
+- SharePoint location or upload blocker
 - confirmed internal metrics used, with source systems
-- fields left as `Validate`, and fields that returned `grounded (none)`
+- fields left as `Validate`, fields that returned `grounded (none)`, and the `PDM Owner` metadata value saved to SharePoint
